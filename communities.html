@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mental Health Communities</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles/header.css">
+  <link rel="stylesheet" href="styles/communities.css">
+  <link rel="stylesheet" href="styles/footer.css">
+</head>
+<body>
+  <!-- Header -->
+  <div id="header"></div>
+
+  <main class="container">
+    <!-- Existing Communities -->
+    <section class="community-list">
+      <h2>Join a Community</h2>
+      <div id="communities">
+        <!-- Sample communities -->
+        <div class="community-card">
+          <h3>Anxiety Support Group</h3>
+          <p>A safe space to share and cope with anxiety together.</p>
+          <button class="join-btn">Join</button>
+        </div>
+
+        <div class="community-card">
+          <h3>Mindfulness Circle</h3>
+          <p>Practice meditation, mindfulness, and relaxation techniques.</p>
+          <button class="join-btn">Join</button>
+        </div>
+
+        <div class="community-card">
+          <h3>ADHD Warriors</h3>
+          <p>Share strategies and find support for ADHD challenges.</p>
+          <button class="join-btn">Join</button>
+        </div>
+
+        <div class="community-card">
+          <h3>Depression Support Hub</h3>
+          <p>Encouraging and uplifting space for those fighting depression.</p>
+          <button class="join-btn">Join</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Create Community -->
+    <section class="create-community">
+      <h2>Create a New Community</h2>
+      <form id="createForm">
+        <input type="text" id="communityName" placeholder="Community name" required>
+        <textarea id="communityDesc" placeholder="Describe your community..." required></textarea>
+        <button type="submit">Create</button>
+      </form>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <div id="footer"></div>
+
+  <script>
+    async function loadComponent(id, file) {
+        const res = await fetch(file);
+        document.getElementById(id).innerHTML = await res.text();
+
+        // If header loaded, attach header.js
+        if (id === "header") {
+        const script = document.createElement("script");
+        script.src = "header.js";
+        script.onload = () => {
+            if (window.updateHeader) window.updateHeader();
+        };
+        document.body.appendChild(script);
+        }
+    }
+
+    loadComponent("header", "header.html");
+    loadComponent("footer", "footer.html");
+    
+    // Toggle join button text
+    document.addEventListener("click", (e) => {
+      if (e.target.classList.contains("join-btn")) {
+        e.target.textContent =
+          e.target.textContent === "Join" ? "Joined ✓" : "Join";
+        e.target.classList.toggle("joined");
+      }
+    });
+
+    // Handle create community
+    const createForm = document.getElementById("createForm");
+    const communities = document.getElementById("communities");
+
+    createForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("communityName").value.trim();
+      const desc = document.getElementById("communityDesc").value.trim();
+
+      if (!name || !desc) return;
+
+      const div = document.createElement("div");
+      div.classList.add("community-card");
+      div.innerHTML = `
+        <h3>${name}</h3>
+        <p>${desc}</p>
+        <button class="join-btn">Join</button>
+      `;
+
+      communities.appendChild(div);
+
+      // Clear form
+      createForm.reset();
+    });
+  </script>
+</body>
+</html>

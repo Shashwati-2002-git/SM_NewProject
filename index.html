@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Mental Wellness Platform</title>
+      <link rel="stylesheet" href="styles/header.css">
+      <link rel="stylesheet" href="styles/index.css">
+      <link rel="stylesheet" href="styles/footer.css">
+    </head>
+    <body>
+
+      <div id="header"></div>
+
+      <div class="container">
+        <!-- Human Professionals -->
+        <div class="card">
+          <h3>👩‍⚕️ Connect with Human Professionals</h3>
+          <p>Browse trusted, verified mental health professionals who can support you directly.</p>
+          <button class="btn" onclick="window.location.href='professionals.html'">View Professionals</button>
+        </div>
+
+        <!-- General AI Professional -->
+        <div class="card">
+          <h3>🤖 General AI Professional & Guide</h3>
+          <p>Talk with an empathetic AI guide to understand your symptoms and get support.</p>
+          <button class="btn" onclick="window.location.href='generalchat.html'">Chat Now</button>
+        </div>
+
+        <!-- Specialist AI Professionals -->
+        <div class="card">
+          <h3>🧠 Specialist AI Professionals</h3>
+          <p>Get tailored help from AI companions specializing in Anxiety, Depression, and more.</p>
+          <button class="btn" onclick="window.location.href='ai-counsellors.html'">Choose Specialist</button>
+        </div>
+
+        <!-- Confidential Diary -->
+        <div class="card">
+          <h3>📔 Your Confidential Diary</h3>
+          <p>Write your thoughts and feelings securely. Only you can access your diary.</p>
+          <button class="btn" onclick="openDiary()">Open Diary</button>
+        </div>
+
+        <!-- Progress Game -->
+        <div class="card">
+          <h3>🎮 Progress Tracking Game</h3>
+          <p>Track your progress journey with fun mood check-ins and progress challenges.</p>
+          <button class="btn" onclick="playGame()">Play Game</button>
+          <p id="gameResult"></p>
+        </div>
+
+        <!-- Community Safe Space -->
+        <div class="card">
+          <h3>🌐 Community Safe Space</h3>
+          <p>Join and create supportive communities forums to share experiences and find solidarity.</p>
+          <button class="btn" onclick="window.location.href='communities.html'">Join Community</button>
+        </div>
+      </div>
+
+      <div id="footer"></div>
+
+      <script src="header.js" defer></script>
+      
+      <script>
+        async function loadComponent(id, file) {
+          const res = await fetch(file);
+          document.getElementById(id).innerHTML = await res.text();
+
+          // If header loaded, attach header.js
+          if (id === "header") {
+            const script = document.createElement("script");
+            script.src = "header.js";
+            script.onload = () => {
+              if (window.updateHeader) window.updateHeader();
+            };
+            document.body.appendChild(script);
+          }
+        }
+
+        loadComponent("header", "header.html");
+        loadComponent("footer", "footer.html");
+      
+        // Simple progress game (mood check)
+        function playGame() {
+          window.location.href = "quiz.html";
+        }
+
+        // Close modal if clicked outside
+        window.onclick = function(event) {
+          if (event.target == diaryModal) {
+            closeDiary();
+          }
+        }
+
+        // Toggle menu
+        document.querySelector(".menu-btn").addEventListener("click", function(e) {
+          const dropdown = document.querySelector(".menu-dropdown");
+          dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+          e.stopPropagation(); // prevent window click from closing immediately
+        });
+
+        // Close menu if clicked outside
+        window.addEventListener("click", function() {
+          document.querySelector(".menu-dropdown").style.display = "none";
+        });
+      </script>
+    </body>
+  </html>

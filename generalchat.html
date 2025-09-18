@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Mental Health Professional</title>
+  <link rel="stylesheet" href="styles/header.css">
+  <link rel="stylesheet" href="styles/generalchat.css">
+  <link rel="stylesheet" href="styles/footer.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div id="chat-container">
+    <div id="chat-box"></div>
+    <div class="input-container">
+      <input type="text" id="userInput" placeholder="Share your thoughts..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <div id="footer"></div>
+
+  <script>
+      async function loadComponent(id, file) {
+          const res = await fetch(file);
+          document.getElementById(id).innerHTML = await res.text();
+
+          // If header loaded, attach header.js
+          if (id === "header") {
+            const script = document.createElement("script");
+            script.src = "header.js";
+            script.onload = () => {
+              if (window.updateHeader) window.updateHeader();
+            };
+            document.body.appendChild(script);
+          }
+        }
+
+        loadComponent("header", "header.html");
+        loadComponent("footer", "footer.html");
+
+        const chatBox = document.getElementById("chat-box");
+        const input = document.getElementById("userInput");
+
+        function appendMessage(sender, text) {
+          const messageDiv = document.createElement("div");
+          messageDiv.className = sender;
+          messageDiv.innerText = text;
+          chatBox.appendChild(messageDiv);
+          chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function sendMessage() {
+          const input = document.getElementById("userInput");
+          const message = input.value.trim();
+          if (!message) return;
+
+          appendMessage("user", "You: " + message);
+          input.value = "";
+
+          try {
+            const response = await fetch("http://localhost:3000/api/general-chat", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ message })
+            });
+
+            const data = await response.json();
+            appendMessage("ai", "AI: " + data.reply);
+          } catch (error) {
+            appendMessage("ai", "⚠️ Sorry, something went wrong.");
+          }
+        }
+
+        // ✅ Only Enter sends message, Shift+Enter does nothing
+        input.addEventListener("keydown", function (event) {
+          if (event.key === "Enter") {
+            event.preventDefault(); // block newline
+            sendMessage();
+          }
+        });
+  </script>
+</body>
+</html>

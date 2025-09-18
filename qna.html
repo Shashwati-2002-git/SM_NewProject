@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SanctoMind Quiz</title>
+  <link rel="stylesheet" href="styles/index.css">
+  <link rel="stylesheet" href="styles/qna.css">
+</head>
+<body>
+  <!-- Header -->
+  <div id="header"></div>
+
+  <main>
+    <div class="quiz-container">
+      <h2 id="quizTitle">Loading quiz...</h2>
+      <form id="quizForm"></form>
+      <button id="submitBtn" class="btn" style="display:none;">Submit Quiz</button>
+      <div id="score" class="score"></div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <div id="footer"></div>
+
+  <script>
+      async function loadComponent(id, file) {
+          const res = await fetch(file);
+          document.getElementById(id).innerHTML = await res.text();
+
+          // If header loaded, attach header.js
+          if (id === "header") {
+            const script = document.createElement("script");
+            script.src = "header.js";
+            script.onload = () => {
+              if (window.updateHeader) window.updateHeader();
+            };
+            document.body.appendChild(script);
+          }
+        }
+
+        loadComponent("header", "header.html");
+        loadComponent("footer", "footer.html");
+
+    // Get query params (type=progress/diagnosis, disorder=OCD/ADHD/etc.)
+    const urlParams = new URLSearchParams(window.location.search);
+    const type = urlParams.get("type");
+    const disorder = urlParams.get("disorder");
+
+    const quizTitle = document.getElementById("quizTitle");
+    const quizForm = document.getElementById("quizForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const scoreDiv = document.getElementById("score");
+
+    let questions = [];
+
+    async function fetchQuestions() {
+      quizTitle.textContent = `Loading ${type} quiz for ${disorder}...`;
+
+      const prompt = `Generate 10 yes/no questions to ${type === "progress" ? "track progress of" : "diagnose"} ${disorder}. Only provide the questions in a numbered list.`;
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: prompt })
+      });
+      const data = await res.json();
+      const text = data.reply;
+
+      // Extract questions from response
+      questions = text.split(/\d+\./).map(q => q.trim()).filter(q => q.length > 0);
+
+      renderQuestions();
+    }
+
+    function renderQuestions() {
+      quizTitle.textContent = `${disorder} - ${type === "progress" ? "Progress Quiz" : "Diagnosis Quiz"}`;
+      quizForm.innerHTML = "";
+
+      questions.forEach((q, index) => {
+        const div = document.createElement("div");
+        div.className = "question";
+        div.innerHTML = `
+          <p><b>Q${index+1}:</b> ${q}</p>
+          <div class="options">
+            <label><input type="radio" name="q${index}" value="Yes" required> Yes</label>
+            <label><input type="radio" name="q${index}" value="No"> No</label>
+          </div>
+        `;
+        quizForm.appendChild(div);
+      });
+
+      submitBtn.style.display = "block";
+    }
+
+    submitBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+
+      const answers = [];
+      for (let i = 0; i < questions.length; i++) {
+        const ans = document.querySelector(`input[name="q${i}"]:checked`);
+        answers.push({ question: questions[i], answer: ans ? ans.value : "No" });
+      }
+      const evalPrompt = `
+        Here are the answers to a ${type} quiz for ${disorder}.
+        Questions and answers: ${JSON.stringify(answers)}.
+        
+        1. Evaluate these answers and give a score out of 100.
+        2. After the score, also provide a short recommendation on whether 
+           the person should consult a mental health professional or not.
+        3. For general mental health quiz in the diagnosis type, provide only a 
+           list of possible conditions they might have based on their answers
+           and no explanations to why they might have these conditions to keep the response concise.
+           
+        Format the reply as:
+        "Your score is X/100." (add a linebreak after this)
+        "Recommendation: [your advice here]" (add a linebreak after this)
+        "Possible conditions: [list of conditions]" (only for general mental health diagnosis quiz)
+      `;
+
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: evalPrompt })
+      });
+      const data = await res.json();
+      scoreDiv.textContent = data.reply;
+
+      // ✅ Show formatted output with line breaks
+      scoreDiv.innerHTML = data.reply.replace(/(?:\r\n|\r|\n)/g, "<br>");    
+    });
+
+    // Load questions on page load
+    fetchQuestions();
+  </script>    
+</body>
+</html>

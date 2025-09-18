@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mental Health Quizzes</title>
+  <link rel="stylesheet" href="styles/index.css">
+  <link rel="stylesheet" href="styles/quiz.css">
+</head>
+<body>
+  <!-- Header -->
+  <div id="header"></div>
+
+  <!-- Main Content -->
+  <main>
+    <section class="quiz-section">
+      <h2>Welcome to SanctoMind Quizzes</h2>
+      <div class="quiz-options">
+        <a href="diagnosisQuiz.html" class="card quiz-card">
+          <h3>Take a quiz to diagnose<br> if you have a condition</h3>
+          <button class="btn">Start</button>
+        </a>
+        <a href="progressQuiz.html" class="card quiz-card">
+          <h3>Take a quiz to track<br> your progress</h3>
+          <button class="btn">Start</button>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <div id="footer"></div>
+
+  <script>
+      async function loadComponent(id, file) {
+          const res = await fetch(file);
+          document.getElementById(id).innerHTML = await res.text();
+
+          // If header loaded, attach header.js
+          if (id === "header") {
+            const script = document.createElement("script");
+            script.src = "header.js";
+            script.onload = () => {
+              if (window.updateHeader) window.updateHeader();
+            };
+            document.body.appendChild(script);
+          }
+        }
+
+        loadComponent("header", "header.html");
+        loadComponent("footer", "footer.html");
+  </script>
+</body>
+</html>

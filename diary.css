@@ -1,0 +1,122 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+    
+.container {
+    display: flex;
+    flex: 1;
+}
+
+.sidebar {
+    width: 200px;
+    border-right: 1px solid #ddd;
+    padding: 10px;
+    background: #fafafa;
+}
+
+.sidebar h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    padding: 8px;
+    border: 1px solid #ccc;
+    margin-bottom: 5px;
+    cursor: pointer;
+    background: #fff;
+}
+
+.sidebar ul li:hover {
+    background: #eaeaea;
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+}
+
+textarea {
+    height:500px;
+    width: 100%;
+    resize: none;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+}
+
+.chatbot-section {
+    height: 300px;
+    width: 100%;
+    border: 1px solid #ccc;
+    background: #eef2f9;  /* softer background */
+    padding: 10px;
+    font-size: 14px;
+    margin-bottom: 10px;
+    overflow-y: auto;
+    border-radius: 8px;  /* rounded corners */
+}
+
+.chatbot-section strong {
+    color: #3d2c8d; /* highlight chatbot label */
+}
+
+.buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+button {
+    padding: 8px 15px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 4px;
+}
+
+.save-btn {
+    background: #4CAF50;
+    color: white;
+}
+
+.finish-btn {
+    background: #2196F3;
+    color: white;
+}
+
+.popup {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.popup.hidden { display: none; }
+.popup-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  width: 300px;
+  text-align: center;
+}
+.popup-buttons {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+}

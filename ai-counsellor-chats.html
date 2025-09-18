@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SanctoMind - Chat with AI Counsellor</title>
+  <link rel="stylesheet" href="styles/header.css">
+  <link rel="stylesheet" href="styles/ai-counsellor-chats.css">
+  <link rel="stylesheet" href="styles/footer.css">
+</head>
+<body>
+  <!-- Load header -->
+  <div id="header"></div>
+
+  <!-- Chat container -->
+  <div class="chat-container">
+    <div class="chat-header">
+      Chat with Counsellor
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="bot-message message">👋 Hello! I'm here to listen. How are you feeling today?</div>
+    </div>
+    <div class="chat-input">
+      <textarea id="userMessage" rows="1" placeholder="Type your message..."></textarea>
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <!-- Load footer -->
+  <div id="footer"></div>
+
+  <script src="header.js" defer></script>
+
+  <script>
+  async function loadComponent(id, file) {
+    const res = await fetch(file);
+    document.getElementById(id).innerHTML = await res.text();
+
+    if (id === "header") {
+      const script = document.createElement("script");
+      script.src = "header.js";
+      script.onload = () => {
+        if (window.updateHeader) window.updateHeader();
+      };
+      document.body.appendChild(script);
+    }
+  }
+
+  loadComponent("header", "header.html");
+  loadComponent("footer", "footer.html");
+
+  const input = document.getElementById("userMessage");
+  const messages = document.getElementById("chatMessages");
+
+  // ✅ Get disorder from query string
+  const urlParams = new URLSearchParams(window.location.search);
+  const disorder = urlParams.get("disorder") || "General";
+
+  // Update header with disorder name
+  const chatHeader = document.querySelector(".chat-header");
+  chatHeader.textContent = `Chat with Counsellor - ${disorder}`;
+
+  // Handle chat
+  async function sendMessage() {
+    const text = input.value.trim();
+    if (!text) return;
+
+    // Show user message
+    const userMsg = document.createElement("div");
+    userMsg.className = "user-message message";
+    userMsg.textContent = text;
+    messages.appendChild(userMsg);
+
+    input.value = "";
+    messages.scrollTop = messages.scrollHeight;
+
+    try {
+      // ✅ Send disorder + message to backend
+      const res = await fetch("/api/specialised-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, disorder })
+      });
+      const data = await res.json();
+
+      // Show bot reply
+      const botMsg = document.createElement("div");
+      botMsg.className = "bot-message message";
+      botMsg.textContent = data.reply;
+      messages.appendChild(botMsg);
+
+      messages.scrollTop = messages.scrollHeight;
+    } catch (err) {
+      console.error("Chat error:", err);
+    }
+  }
+
+  // ✅ Enter key event listener
+  input.addEventListener("keypress", function (e) {
+    if (e.key === "Enter" && !e.shiftKey) { 
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+</script>
+
+</body>
+</html>

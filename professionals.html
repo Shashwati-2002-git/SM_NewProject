@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Our Professionals</title>
+  <link rel="stylesheet" href="styles/index.css">
+  <style>
+    .pro-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    .pro-card {
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 12px;
+      background: #f9f9f9;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+    }
+
+    .pro-card:hover {
+      transform: scale(1.08);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+    .pro-card img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .pro-card h3 {
+      margin: 10px 0 5px;
+    }
+    .pro-card p {
+      font-size: 14px;
+      margin: 5px 0;
+    }
+    .timing {
+      font-size: 13px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div id="header"></div>
+
+  <div id="professionals" class="pro-container"></div>
+
+  <div id="footer"></div>
+
+  <script>
+      async function loadComponent(id, file) {
+          const res = await fetch(file);
+          document.getElementById(id).innerHTML = await res.text();
+
+          // If header loaded, attach header.js
+          if (id === "header") {
+            const script = document.createElement("script");
+            script.src = "header.js";
+            script.onload = () => {
+              if (window.updateHeader) window.updateHeader();
+            };
+            document.body.appendChild(script);
+          }
+        }
+
+        loadComponent("header", "header.html");
+        loadComponent("footer", "footer.html");
+
+    // Fetch professionals
+    async function loadProfessionals() {
+      try {
+        const res = await fetch("/api/professionals");
+        const professionals = await res.json();
+
+        const container = document.getElementById("professionals");
+        container.innerHTML = professionals.map(pro => `
+          <div class="pro-card">
+            <img src="/images/${pro.HP_Profile_URL}" alt="${pro.HP_Name}">
+            <h3>${pro.HP_Name}</h3>
+            <p><strong>Specialization:</strong> ${pro.HP_Sp_Field}</p>
+            <p class="timing"><strong>Weekdays:</strong> ${pro.WD_Timing}</p>
+            <p class="timing"><strong>Sunday:</strong> ${pro.SD_Timing}</p>
+          </div>
+        `).join("");
+      } catch (err) {
+        console.error("Error loading professionals:", err);
+      }
+    }
+
+    loadProfessionals();
+  </script>
+</body>
+</html>

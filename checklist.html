@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mental Health Daily Checklist</title>
+  <link rel="stylesheet" href="styles/header.css">
+  <link rel="stylesheet" href="styles/checklist.css">
+    <link rel="stylesheet" href="styles/footer.css">
+</head>
+<body>
+  <!-- Header -->
+  <div id="header"></div>
+
+  <!-- Main layout: left checklist, right remarks -->
+  <main class="container">
+    <!-- left sidebar: selector, create button, checklist, finish -->
+    <aside class="left-panel">
+      <label for="disorderSelect" class="label">Choose a condition</label>
+      <select id="disorderSelect" aria-label="Select mental disorder">
+        <option value="" disabled selected>— Select a disorder —</option>
+        <option>Anxiety</option>
+        <option>Depression</option>
+        <option>OCD</option>
+        <option>ADHD</option>
+        <option>PTSD</option>
+        <option>Alzheimer</option>
+        <option>Dementia</option>
+        <option>Schizophrenia</option>
+        <option>Panic Disorder</option>
+        <option>Bipolar Disorder</option>
+      </select>
+
+      <button id="createBtn" class="primary">Create a checklist</button>
+
+      <div id="checklistArea" class="checklist-area" hidden>
+        <ol id="tasksList" class="tasks-list" aria-live="polite"></ol>
+        <button id="finishBtn" class="primary outline">Finish</button>
+      </div>
+
+      <div id="leftFooter" class="left-footer">
+        <small>Tip: Use these tasks as simple daily reminders. This is not a substitute for professional care.</small>
+      </div>
+    </aside>
+
+    <!-- right panel: remarks -->
+    <section class="right-panel" aria-live="polite">
+      <h2>Remarks</h2>
+      <div id="remarksBox" class="remarks-box">No remarks yet. Create a checklist to get started.</div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <div id="footer"></div>
+
+  <script src="header.js" defer></script>
+
+  <script>
+    // Load header & footer
+    async function loadComponent(id, file) {
+      const res = await fetch(file);
+      document.getElementById(id).innerHTML = await res.text();
+
+      if (id === "header") {
+        const script = document.createElement("script");
+        script.src = "header.js";
+        document.body.appendChild(script);
+      }
+    }
+    loadComponent("header", "header.html");
+    loadComponent("footer", "footer.html");
+    
+    const disorderSelect = document.getElementById("disorderSelect");
+    const createChecklistBtn = document.getElementById("createBtn");
+    const checklistEl = document.getElementById("tasksList");
+    const finishBtn = document.getElementById("finishBtn");
+    const remarksBox = document.getElementById("remarksBox");
+
+    // Store tasks locally
+    let tasks = [];
+
+    // ---------------- Create Checklist ----------------
+    createChecklistBtn.addEventListener("click", async () => {
+    const disorder = disorderSelect.value;
+    if (!disorder) {
+        alert("Please select a disorder.");
+        return;
+    }
+
+    checklistEl.innerHTML = "<li>Loading checklist...</li>";
+    remarksBox.innerHTML = "";
+
+    try {
+        const response = await fetch("http://localhost:3000/api/checklist-response", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ disorder, type: "checklist" })
+        });
+
+        const data = await response.json();
+        const tasksText = data.message.split("\n").filter(line => line.trim() !== "");
+
+        checklistEl.innerHTML = "";
+        tasks = tasksText.map((task, index) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+            ${task.trim()}
+            <input type="checkbox" data-index="${index}">
+        `;
+        checklistEl.appendChild(li);
+        return { text: task.trim(), done: false };
+        });
+
+        finishBtn.style.display = "block";
+    } catch (err) {
+        checklistEl.innerHTML = "<li>Error loading checklist.</li>";
+        console.error(err);
+    }
+    });
+
+    // ---------------- Finish Checklist ----------------
+    finishBtn.addEventListener("click", async () => {
+    const checkboxes = checklistEl.querySelectorAll("input[type='checkbox']");
+    checkboxes.forEach(cb => {
+        const index = cb.dataset.index;
+        tasks[index].done = cb.checked;
+    });
+
+    const disorder = disorderSelect.value;
+
+    remarksBox.innerHTML = "Generating remarks...";
+
+    try {
+        const response = await fetch("http://localhost:3000/api/checklist-response", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ disorder, tasks, type: "remarks" })
+        });
+
+        const data = await response.json();
+        remarksBox.innerHTML = `<p>${data.message}</p>`;
+    } catch (err) {
+        remarksBox.innerHTML = "<p>Error generating remarks.</p>";
+        console.error(err);
+    }
+    });
+  </script>
+</body>
+</html>

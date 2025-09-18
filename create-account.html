@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Account</title>
+  <link rel="stylesheet" href="styles/index.css">
+  <link rel="stylesheet" href="styles/create-account.css">
+</head>
+<body>
+  <!-- Header -->
+  <div id="header"></div>
+
+  <main class="account-container">
+
+    <!-- Form Section -->
+    <div class="form-section">
+      <h2>Create Account</h2>
+      <form id="createAccountForm">
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="text" id="emailPhone" placeholder="Email ID / Phone" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <input type="password" id="confirmPassword" placeholder="Re-enter Password" required>
+        <button type="submit" class="btn">Create Account</button>
+      </form>
+      <p id="message"></p>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <div id="footer"></div>
+
+  <script>
+  // Load header and footer
+  async function loadComponent(id, file) {
+    const res = await fetch(file);
+    document.getElementById(id).innerHTML = await res.text();
+
+    // After header is injected, load header.js
+    if (id === "header") {
+      const script = document.createElement("script");
+      script.src = "header.js";
+      script.onload = () => {
+        if (window.updateHeader) window.updateHeader();
+      };
+      document.body.appendChild(script);
+    }
+  }
+
+  loadComponent("header", "header.html");
+  loadComponent("footer", "footer.html");
+
+  // Handle Create Account form
+  document.getElementById("createAccountForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const username = document.getElementById("username").value.trim();
+    const emailPhone = document.getElementById("emailPhone").value.trim();
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+
+    if (password !== confirmPassword) {
+      document.getElementById("message").innerText = "❌ Passwords do not match!";
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/create-account", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, emailPhone, password })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        // ✅ Save login flag
+        localStorage.setItem("loggedInUser", "true");
+
+        // ✅ Update header immediately
+        if (window.updateHeader) window.updateHeader();
+
+        document.getElementById("message").innerText =
+          "✅ Account created successfully! Redirecting...";
+
+        setTimeout(() => {
+          window.location.href = "index.html"; // redirect to homepage
+        }, 1500);
+      } else {
+        document.getElementById("message").innerText =
+          data.message || "❌ Failed to create account.";
+      }
+    } catch (err) {
+      document.getElementById("message").innerText = "❌ Error: " + err.message;
+    }
+  });
+</script>
+
+</body>
+</html>

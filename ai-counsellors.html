@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Mental Health Counsellors</title>
+  <link rel="stylesheet" href="styles/header.css">
+  <link rel="stylesheet" href="styles/ai-counsellors.css">
+  <link rel="stylesheet" href="styles/footer.css">
+</head>
+<body>
+
+  <div id="header"></div>
+
+  <div class="container">
+    <h1>Your AI Mental Health Counsellors</h1>
+    <div class="grid">
+      <!-- Counsellors -->
+      <div class="counsellor-card">
+        <img src="images/Psychiatrist1.jpeg" alt="Anxiety">
+        <h3>Anxiety</h3>
+        <button class="btn" onclick="goToChat('Anxiety')">Chat Now</button>
+      </div>
+      <div class="counsellor-card">
+        <img src="images/depression.jpg" alt="Depression">
+        <h3>Depression</h3>
+        <button class="btn" onclick="goToChat('Depression')">Chat Now</button>
+      </div>
+      <div class="counsellor-card">
+        <img src="images/ocd.jpg" alt="OCD">
+        <h3>OCD</h3>
+        <button class="btn" onclick="goToChat('OCD')">Chat Now</button>
+      </div>
+      <div class="counsellor-card">
+        <img src="images/adhd.jpg" alt="ADHD">
+        <h3>ADHD</h3>
+        <button class="btn" onclick="goToChat('ADHD')">Chat Now</button>
+      </div>
+      <div class="counsellor-card">
+        <img src="images/ptsd.jpg" alt="PTSD">
+        <h3>PTSD</h3>
+        <button class="btn" onclick="goToChat('PTSD')">Chat Now</button>
+      </div>
+      <div class="counsellor-card">
+        <img src="images/schizophrenia.jpg" alt="Schizophrenia">
+        <h3>Schizophrenia</h3>
+        <button class="btn" onclick="goToChat('Schizophrenia')">Chat Now</button>
+      </div>
+      <div class="counsellor-card">
+        <img src="images/alzheimer.jpg" alt="Alzheimer's">
+        <h3>Alzheimer's</h3>
+        <button class="btn" onclick="goToChat('Alzheimer')">Chat Now</button>
+      </div>
+      <div class="counsellor-card">
+        <img src="images/dementia.jpg" alt="Dementia">
+        <h3>Dementia</h3>
+        <button class="btn" onclick="goToChat('Dementia')">Chat Now</button>
+      </div>
+      <div class="counsellor-card">
+        <img src="images/social-anxiety.jpg" alt="Social Anxiety Disorder">
+        <h3>Social Anxiety Disorder</h3>
+        <button class="btn" onclick="goToChat('Social Anxiety Disorder')">Chat Now</button>
+      </div>
+      <div class="counsellor-card">
+        <img src="images/bipolar.jpg" alt="Bipolar Disorder">
+        <h3>Bipolar Disorder</h3>
+        <button class="btn" onclick="goToChat('Bipolar Disorder')">Chat Now</button>
+      </div>
+      <div class="counsellor-card">
+        <img src="images/phobia.jpg" alt="Phobias">
+        <h3>Phobias</h3>
+        <button class="btn" onclick="goToChat('Phobias')">Chat Now</button>
+      </div>
+      <div class="counsellor-card">
+        <img src="images/eating.jpg" alt="Eating Disorders">
+        <h3>Eating Disorders</h3>
+        <button class="btn" onclick="goToChat('Eating Disorders')">Chat Now</button>
+      </div>
+      <div class="counsellor-card">
+        <img src="images/bpd.jpg" alt="Borderline Personality Disorder">
+        <h3>Borderline Personality Disorder</h3>
+        <button class="btn" onclick="goToChat('Borderline Personality Disorder')">Chat Now</button>
+      </div>
+      <div class="counsellor-card">
+        <img src="images/addiction.jpg" alt="Addiction">
+        <h3>Addiction</h3>
+        <button class="btn" onclick="goToChat('Addiction')">Chat Now</button>
+      </div>
+      <div class="counsellor-card">
+        <img src="images/panic.jpg" alt="Panic Disorder">
+        <h3>Panic Disorder</h3>
+        <button class="btn" onclick="goToChat('Panic Disorder')">Chat Now</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer"></div>
+
+  <script src="header.js" defer></script>
+
+  <script>
+    async function loadComponent(id, file) {
+      const res = await fetch(file);
+      document.getElementById(id).innerHTML = await res.text();
+
+      if (id === "header") {
+        const script = document.createElement("script");
+        script.src = "header.js";
+        document.body.appendChild(script);
+      }
+    }
+
+    loadComponent("header", "header.html");
+    loadComponent("footer", "footer.html");
+
+    function goToChat(disorder) {
+      window.location.href = `ai-counsellor-chats.html?disorder=${encodeURIComponent(disorder)}`;
+    }
+  </script>
+</body>
+</html>

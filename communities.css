@@ -1,0 +1,84 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f4f7fb;
+  margin: 0;
+  padding: 20px;
+  color: #333;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+
+.community-list h2,
+.create-community h2 {
+  margin-bottom: 10px;
+  color: #3d2c8d;
+}
+
+.community-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.community-card h3 {
+  margin: 0 0 8px;
+  color: #5a3ea1;
+}
+
+.join-btn {
+  background: #5a3ea1;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.join-btn:hover {
+  background: #7b4ed4;
+}
+
+.join-btn.joined {
+  background: #28a745; /* green when joined */
+}
+
+.create-community form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.create-community input,
+.create-community textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.create-community button {
+  background: #3d2c8d;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.create-community button:hover {
+  background: #5a3ea1;
+}
+
+@media (max-width: 768px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
+}

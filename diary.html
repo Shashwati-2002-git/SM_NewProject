@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Diary</title>
+  <link rel="stylesheet" href="styles/index.css">
+  <link rel="stylesheet" href="styles/diary.css">
+</head>
+<body>
+  <div id="header"></div>
+
+  <div class="container">
+    <div class="sidebar">
+      <h3>My Diary Entries</h3>
+      <ul>
+        <li>Entry 1</li>
+        <li>Entry 2</li>
+      </ul>
+    </div>
+    <div class="main-content">
+      <textarea placeholder="Write your diary entry here..."></textarea>
+
+      <!-- Chatbot Response Section -->
+      <div class="chatbot-section">
+        <strong>Chatbot:</strong> Your reflections will appear here after analysis...
+      </div>
+
+      <div class="buttons">
+        <button class="finish-btn">Finish</button>
+        <button class="save-btn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup for naming diary -->
+  <div id="namePopup" class="popup hidden">
+    <div class="popup-content">
+      <h3>Name your Diary Entry</h3>
+      <input type="text" id="entryName" placeholder="e.g., Morning Reflection" />
+      <div class="popup-buttons">
+        <button id="cancelBtn">Cancel</button>
+        <button id="okBtn">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer"></div>
+
+  <script>
+      async function loadComponent(id, file) {
+          const res = await fetch(file);
+          document.getElementById(id).innerHTML = await res.text();
+
+          // If header loaded, attach header.js
+          if (id === "header") {
+            const script = document.createElement("script");
+            script.src = "header.js";
+            script.onload = () => {
+              if (window.updateHeader) window.updateHeader();
+            };
+            document.body.appendChild(script);
+          }
+        }
+
+      loadComponent("header", "header.html");
+      loadComponent("footer", "footer.html");
+
+    const saveBtn = document.querySelector(".save-btn");
+    const finishBtn = document.querySelector(".finish-btn");
+    const diaryText = document.querySelector("textarea");
+    const chatbotSection = document.querySelector(".chatbot-section");
+    const sidebar = document.querySelector(".sidebar ul");
+
+    let lastGeminiReply = null; // store chatbot reply for saving
+
+    // Load diary entries into sidebar
+    async function loadEntries() {
+      try {
+        const res = await fetch("/api/diary");
+        const entries = await res.json();
+
+        sidebar.innerHTML = "";
+        entries.forEach(entry => {
+          const li = document.createElement("li");
+          li.textContent = `${entry.EntryName} (${entry.EntryDate} ${entry.EntryTime})`;
+          
+          // store both content and Gemini reply
+          li.dataset.content = entry.Content;
+          li.dataset.reply = entry.GeminiReply || "No analysis available.";
+
+          li.addEventListener("click", () => {
+            diaryText.value = entry.Content;
+            chatbotSection.innerHTML = `<strong>Chatbot:</strong> ${li.dataset.reply}`;
+          });
+
+          sidebar.appendChild(li);
+        });
+      } catch (err) {
+        console.error("Error loading entries:", err);
+      }
+    }
+
+    // Save diary entry to DB (with Gemini reply)
+    async function saveDiary(content, title, geminiReply) {
+      try {
+        console.log("➡️ Sending to server:", { content, title, geminiReply }); // DEBUG
+        const res = await fetch("/api/diary", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content, title, geminiReply }),
+        });
+        return await res.json();
+      } catch (err) {
+        console.error("Error saving diary:", err);
+        return null;
+      }
+    }
+
+    // Reusable function to talk to Gemini
+    async function sendToGemini(entry, action) {
+      if (!entry) {
+        chatbotSection.innerHTML = `<strong>Chatbot:</strong> Please write something before clicking ${action}.`;
+        return;
+      }
+
+      chatbotSection.innerHTML = `<strong>Chatbot:</strong> ⏳ Analyzing your entry...`;
+
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: entry }),
+        });
+
+        const data = await res.json();
+        lastGeminiReply = data.reply; // save reply
+        chatbotSection.innerHTML = `<strong>Chatbot:</strong> ${data.reply}`;
+      } catch (err) {
+        chatbotSection.innerHTML = `<strong>Chatbot:</strong> ⚠️ Failed to connect to server on ${action}.`;
+        console.error(err);
+      }
+    }
+
+    // Finish button → send to Gemini
+    finishBtn.addEventListener("click", () => {
+      const entry = diaryText.value.trim();
+      sendToGemini(entry, "Finish");    
+    });
+
+    // Show popup instead of saving directly
+    saveBtn.addEventListener("click", () => {
+      if (!diaryText.value.trim()) return alert("Please write something first.");
+      document.getElementById("namePopup").style.display = "flex";
+    });
+
+    // Cancel popup
+    document.getElementById("cancelBtn").addEventListener("click", () => {
+      document.getElementById("namePopup").style.display = "none";
+    });
+
+    // OK → save diary with title + Gemini reply
+    document.getElementById("okBtn").addEventListener("click", async () => {
+      const entry = diaryText.value.trim();
+      const title = document.getElementById("entryName").value.trim();
+      if (!title) return alert("Please give your diary a name.");
+
+      // use the stored Gemini reply instead of scraping the DOM
+      const saved = await saveDiary(entry, title, lastGeminiReply);
+
+      if (saved?.success) {
+        loadEntries(); // refresh sidebar
+        document.getElementById("namePopup").style.display = "none";
+        document.getElementById("entryName").value = ""; // clear box
+      }
+    });
+
+    // Pressing Enter in the diary name input = clicking OK
+    document.getElementById("entryName").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault(); // stop form submission
+        document.getElementById("okBtn").click(); // trigger save
+      }
+    });
+
+    // Initial load
+    loadEntries();
+
+  </script>
+</body>
+</html>

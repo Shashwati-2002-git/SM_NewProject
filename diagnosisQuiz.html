@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Diagnosis Quizzes</title>
+  <link rel="stylesheet" href="styles/index.css">
+  <link rel="stylesheet" href="styles/diagnosisQuiz.css">
+</head>
+<body>
+  <!-- Header -->
+  <div id="header"></div>
+
+  <!-- Main Content -->
+  <main>
+    <section class="diagnosis-section">
+      <h2>Select a Diagnosis Quiz</h2>
+      <div class="quiz-grid">
+        <div class="card">
+          <h3>General Mental Health</h3>
+          <button class="btn" onclick="window.location.href='qna.html?type=diagnosis&disorder=general-mental-health'">Start</button>
+        </div>
+        <div class="card">
+          <h3>Anxiety & Depression</h3>
+          <button class="btn" onclick="window.location.href='qna.html?type=diagnosis&disorder=anxiety-depression'">Start</button>
+        </div>
+        <div class="card">
+          <h3>OCD</h3>
+          <button class="btn" onclick="window.location.href='qna.html?type=diagnosis&disorder=ocd'">Start</button>
+        </div>
+        <div class="card">
+          <h3>ADHD</h3>
+          <button class="btn" onclick="window.location.href='qna.html?type=diagnosis&disorder=adhd'">Start</button>
+        </div>
+        <div class="card">
+          <h3>Bipolar Disorder</h3>
+          <button class="btn" onclick="window.location.href='qna.html?type=diagnosis&disorder=bipolar'">Start</button>
+        </div>
+        <div class="card">
+          <h3>PTSD</h3>
+          <button class="btn" onclick="window.location.href='qna.html?type=diagnosis&disorder=ptsd'">Start</button>
+        </div>
+      </div>
+      <p class="back-link"><a href="quiz.html">⬅ Back to Quizzes</a></p>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <div id="footer"></div>
+
+  <script>
+      async function loadComponent(id, file) {
+          const res = await fetch(file);
+          document.getElementById(id).innerHTML = await res.text();
+
+          // If header loaded, attach header.js
+          if (id === "header") {
+            const script = document.createElement("script");
+            script.src = "header.js";
+            script.onload = () => {
+              if (window.updateHeader) window.updateHeader();
+            };
+            document.body.appendChild(script);
+          }
+        }
+
+        loadComponent("header", "header.html");
+        loadComponent("footer", "footer.html");
+  </script>
+</body>
+</html>
